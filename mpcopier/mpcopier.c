@@ -15,6 +15,9 @@ FILE *src_file;
 FILE *dst_file;
 
 int n_threads;
+int readers_done = 0;
+
+pthread_mutex_t queue_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 // Función para insertar en la cola
 void enqueue(char *line) {
@@ -41,24 +44,39 @@ void *reader_thread(void *arg) {
 
         char *line = strdup(buffer);
 
+        pthread_mutex_lock(&queue_mutex);
         if (count < MAX_QUEUE_SIZE) {
             enqueue(line);
         } else {
-            free(line); // Evita sobrecargar la cola en esta subtask sin sincronización
+            // In subtask 1, if queue is full, drop the line
+            free(line);
         }
+        pthread_mutex_unlock(&queue_mutex);
     }
+
+    pthread_mutex_lock(&queue_mutex);
+    readers_done++;
+    pthread_mutex_unlock(&queue_mutex);
     return NULL;
 }
 
 // Hilo escritor
 void *writer_thread(void *arg) {
     while (1) {
+        pthread_mutex_lock(&queue_mutex);
         if (count > 0) {
             char *line = dequeue();
+            pthread_mutex_unlock(&queue_mutex);
+
             fprintf(dst_file, "%s", line);
             free(line);
         } else {
-            break;
+            // exit condition: all readers finished and queue empty
+            if (readers_done == n_threads) {
+                pthread_mutex_unlock(&queue_mutex);
+                break;
+            }
+            pthread_mutex_unlock(&queue_mutex);
         }
     }
     return NULL;
