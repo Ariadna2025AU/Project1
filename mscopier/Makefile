@@ -1,12 +1,12 @@
 CC = gcc
 CFLAGS = -std=c11 -Wall -Werror
 LDFLAGS = -lpthread
-TARGET = mpcopier
+TARGET = mscopier
 
 all: $(TARGET)
 
-$(TARGET): mpcopier.c
-	$(CC) $(CFLAGS) -o $(TARGET) mpcopier.c $(LDFLAGS)
+$(TARGET): mscopier.c
+	$(CC) $(CFLAGS) -o $(TARGET) mscopier.c $(LDFLAGS)
 
 clean:
 	rm -f $(TARGET)
