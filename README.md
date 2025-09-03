@@ -1,4 +1,3 @@
-===========================================================
 README - COSC1114 Project 1
 ===========================================================
 
@@ -73,6 +72,5 @@ Memory Correctness
   valgrind --track-origins=yes --leak-check=full --show-leak-kinds=all ./program args
 - No memory leaks or invalid memory accesses reported.
 
-===========================================================
 End of README
 ===========================================================
