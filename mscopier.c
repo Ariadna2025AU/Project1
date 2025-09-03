@@ -27,6 +27,17 @@ pthread_cond_t queue_not_full = PTHREAD_COND_INITIALIZER;
 pthread_cond_t queue_not_empty = PTHREAD_COND_INITIALIZER;
 pthread_cond_t can_write = PTHREAD_COND_INITIALIZER;
 
+// Safe replacement for strdup (not available on all compilers)
+char *my_strdup(const char *s) {
+    size_t len = strlen(s) + 1;
+    char *dup = malloc(len);
+    if (dup == NULL) {
+        return NULL;
+    }
+    memcpy(dup, s, len);
+    return dup;
+}
+
 // Enqueue
 void enqueue(queue_item item) {
     queue[rear] = item;
@@ -50,9 +61,9 @@ void *reader_thread(void *arg) {
     int line_num = 0;
 
     while (fgets(buffer, MAX_LINE_LENGTH, src_file)) {
-        char *line = strdup(buffer);
+        char *line = my_strdup(buffer);
         if (!line) {
-            perror("strdup failed");
+            perror("malloc failed in my_strdup");
             pthread_exit(NULL);
         }
 
